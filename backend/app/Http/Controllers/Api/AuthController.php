@@ -7,11 +7,12 @@ use App\Models\Usuario;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
     /**
-     * Registrar novo usuário.
+     * Registrar novo usuário e retornar JWT token.
      *
      * POST /api/auth/register
      */
@@ -30,14 +31,18 @@ class AuthController extends Controller
 
         $usuario = Usuario::create($validated);
 
+        $token = JWTAuth::fromUser($usuario);
+
         return response()->json([
             'message' => 'Usuário criado com sucesso.',
             'usuario' => $usuario,
+            'token'   => $token,
+            'tipo'    => 'Bearer',
         ], 201);
     }
 
     /**
-     * Login do usuário.
+     * Login do usuário e retornar JWT token.
      *
      * POST /api/auth/login
      */
@@ -56,9 +61,52 @@ class AuthController extends Controller
             ], 401);
         }
 
+        $token = JWTAuth::fromUser($usuario);
+
         return response()->json([
             'message' => 'Login realizado com sucesso.',
             'usuario' => $usuario,
+            'token'   => $token,
+            'tipo'    => 'Bearer',
+        ]);
+    }
+
+    /**
+     * Retorna os dados do usuário autenticado.
+     *
+     * GET /api/auth/me
+     */
+    public function me(): JsonResponse
+    {
+        return response()->json(auth()->user());
+    }
+
+    /**
+     * Faz logout (invalida o token).
+     *
+     * POST /api/auth/logout
+     */
+    public function logout(): JsonResponse
+    {
+        auth()->logout();
+
+        return response()->json([
+            'message' => 'Logout realizado com sucesso.',
+        ]);
+    }
+
+    /**
+     * Renova o JWT token.
+     *
+     * POST /api/auth/refresh
+     */
+    public function refresh(): JsonResponse
+    {
+        $token = auth()->refresh();
+
+        return response()->json([
+            'token' => $token,
+            'tipo'  => 'Bearer',
         ]);
     }
 }
