@@ -1,0 +1,29 @@
+# Dependencies
+backend/vendor/
+mobile/node_modules/
+
+# Environment (contains secrets)
+.env
+backend/.env
+
+# Laravel
+backend/storage/logs/*
+backend/bootstrap/cache/*
+
+# Expo
+mobile/.expo/
+mobile/dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Docker volumes (if not using named volumes)
+mysqldata/
