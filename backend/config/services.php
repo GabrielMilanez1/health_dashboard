@@ -46,6 +46,7 @@ return [
     */
     'gemini' => [
         'api_key' => env('GEMINI_API_KEY'),
+        'modelo'  => env('GEMINI_MODEL', 'gemini-2.0-flash'),
     ],
 
 ];

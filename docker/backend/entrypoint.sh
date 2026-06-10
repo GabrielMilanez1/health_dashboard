@@ -85,8 +85,9 @@ sed -i "s|APP_URL=.*|APP_URL=http://localhost:9000|" .env
 # Add GEMINI_API_KEY to .env if not present
 if ! grep -q "GEMINI_API_KEY" .env; then
     echo "" >> .env
-    echo "# Google Gemini AI API Key" >> .env
+    echo "# Google Gemini AI" >> .env
     echo "GEMINI_API_KEY=${GEMINI_API_KEY:-}" >> .env
+    echo "GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}" >> .env
 fi
 
 # =============================================================================
