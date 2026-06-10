@@ -37,16 +37,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Google Gemini AI
+    | Groq (LLM)
     |--------------------------------------------------------------------------
     |
-    | Configuration for Google Gemini API integration.
-    | Get your API key at: https://aistudio.google.com/apikey
+    | Configuration for Groq API integration.
+    | Get your API key at: https://console.groq.com/keys
     |
     */
-    'gemini' => [
-        'api_key' => env('GEMINI_API_KEY'),
-        'modelo'  => env('GEMINI_MODEL', 'gemini-2.0-flash'),
+    'groq' => [
+        'api_key' => env('GROQ_API_KEY'),
+        'modelo'  => env('GROQ_MODEL', 'llama-3.3-70b-versatile'),
     ],
 
 ];

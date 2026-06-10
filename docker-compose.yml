@@ -55,8 +55,8 @@ services:
       DB_DATABASE: ${DB_DATABASE:-db_health_dashboard}
       DB_USERNAME: ${DB_USERNAME:-db_user}
       DB_PASSWORD: ${DB_PASSWORD:-db_senha}
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.0-flash}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
       APP_ENV: local
       APP_DEBUG: "true"
     depends_on:

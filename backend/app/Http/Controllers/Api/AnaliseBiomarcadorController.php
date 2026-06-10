@@ -3,50 +3,39 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\AnaliseBiomarcador;
-use App\Models\InterpretadorIA;
+use App\Services\AnaliseBiomarcadorService;
+use App\Services\InterpretadorIAService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class AnaliseBiomarcadorController extends Controller
 {
+    public function __construct(
+        private AnaliseBiomarcadorService $analiseService
+    ) {}
+
     /**
      * Submeter biomarcadores para análise pela IA.
      *
      * POST /api/analise
-     * Header: Authorization: Bearer {token}
      */
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate(InterpretadorIA::validationRules());
+        $validated = $request->validate(InterpretadorIAService::validationRules());
 
-        // Cria o registro vinculado ao usuário autenticado
-        $analise = AnaliseBiomarcador::create([
-            'usuario_id' => auth()->id(),
-            ...$validated,
-        ]);
+        $result = $this->analiseService->criar(auth()->id(), $validated);
 
-        // Envia pra IA interpretar
-        $ia = new InterpretadorIA();
-        $resultado = $ia->interpretar($analise);
-
-        return response()->json([
-            'analise'   => $analise->fresh(),
-            'resultado' => $resultado,
-        ], 201);
+        return response()->json($result, 201);
     }
 
     /**
      * Listar histórico de análises do usuário autenticado.
      *
      * GET /api/analises
-     * Header: Authorization: Bearer {token}
      */
     public function index(): JsonResponse
     {
-        $analises = AnaliseBiomarcador::where('usuario_id', auth()->id())
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $analises = $this->analiseService->listar(auth()->id());
 
         return response()->json($analises);
     }
@@ -55,12 +44,14 @@ class AnaliseBiomarcadorController extends Controller
      * Ver uma análise específica.
      *
      * GET /api/analise/{id}
-     * Header: Authorization: Bearer {token}
      */
     public function show(int $id): JsonResponse
     {
-        $analise = AnaliseBiomarcador::where('usuario_id', auth()->id())
-            ->findOrFail($id);
+        $analise = $this->analiseService->buscar($id, auth()->id());
+
+        if (!$analise) {
+            return response()->json(['message' => 'Análise não encontrada.'], 404);
+        }
 
         return response()->json($analise);
     }

@@ -1,20 +1,21 @@
 <?php
 
-namespace App\Models;
+namespace App\Services;
 
+use App\Models\AnaliseBiomarcador;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class InterpretadorIA
+class InterpretadorIAService
 {
     private string $apiKey;
     private string $modelo;
-    private string $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
+    private string $baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
     public function __construct()
     {
-        $this->apiKey = config('services.gemini.api_key', '');
-        $this->modelo = config('services.gemini.modelo', 'gemini-2.0-flash');
+        $this->apiKey = config('services.groq.api_key') ?? '';
+        $this->modelo = config('services.groq.modelo') ?? 'llama-3.3-70b-versatile';
     }
 
     // =========================================================================
@@ -32,9 +33,16 @@ class InterpretadorIA
         - Sempre esclareça que você NÃO substitui uma consulta médica.
         - Classifique cada biomarcador como: Normal, Atenção ou Crítico.
         - Explique o significado de cada valor de forma simples.
-        - Ao final, dê recomendações gerais de saúde com base no conjunto de dados.
         - Se algum valor estiver em faixa crítica, recomende buscar atendimento médico.
         - Responda sempre em português brasileiro.
+
+        Ao final da análise, apresente EXATAMENTE 3 recomendações de hábitos diários
+        práticos e personalizados com base nos biomarcadores recebidos. Formate assim:
+
+        **Recomendações de Hábitos Diários:**
+        1. [Recomendação prática e específica]
+        2. [Recomendação prática e específica]
+        3. [Recomendação prática e específica]
 
         Faixas de referência:
         - Horas de sono: ideal 7-9h | atenção <6h ou >10h | crítico <4h
@@ -48,7 +56,7 @@ class InterpretadorIA
     }
 
     // =========================================================================
-    // Montar prompt do usuário a partir da análise
+    // Montar prompt do usuário
     // =========================================================================
 
     private function promptUsuario(AnaliseBiomarcador $analise): string
@@ -97,13 +105,12 @@ class InterpretadorIA
     }
 
     // =========================================================================
-    // Chamada à API do Gemini
+    // Chamada à API do Groq
     // =========================================================================
 
     /**
-     * Interpreta os biomarcadores de uma análise usando a API do Gemini.
+     * Interpreta os biomarcadores usando a API do Groq.
      *
-     * @param  AnaliseBiomarcador  $analise
      * @return array{sucesso: bool, resposta: string|null, erro: string|null}
      */
     public function interpretar(AnaliseBiomarcador $analise): array
@@ -112,38 +119,32 @@ class InterpretadorIA
             return [
                 'sucesso' => false,
                 'resposta' => null,
-                'erro' => 'GEMINI_API_KEY não configurada.',
+                'erro' => 'GROQ_API_KEY não configurada.',
             ];
         }
 
-        $url = "{$this->baseUrl}/{$this->modelo}:generateContent?key={$this->apiKey}";
+        $promptUsuario = $this->promptUsuario($analise);
 
         $payload = [
-            'system_instruction' => [
-                'parts' => [
-                    ['text' => $this->promptSistema()],
-                ],
+            'model' => $this->modelo,
+            'messages' => [
+                ['role' => 'system', 'content' => $this->promptSistema()],
+                ['role' => 'user', 'content' => $promptUsuario],
             ],
-            'contents' => [
-                [
-                    'parts' => [
-                        ['text' => $this->promptUsuario($analise)],
-                    ],
-                ],
-            ],
-            'generationConfig' => [
-                'temperature' => 0.4,
-                'maxOutputTokens' => 2048,
-            ],
+            'temperature' => 0.4,
+            'max_tokens' => 2048,
         ];
 
         try {
             $response = Http::timeout(30)
-                ->withHeaders(['Content-Type' => 'application/json'])
-                ->post($url, $payload);
+                ->withHeaders([
+                    'Content-Type'  => 'application/json',
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                ])
+                ->post($this->baseUrl, $payload);
 
             if (!$response->successful()) {
-                Log::error('InterpretadorIA: Erro na API do Gemini', [
+                Log::error('InterpretadorIA: Erro na API do Groq', [
                     'status' => $response->status(),
                     'body'   => $response->body(),
                 ]);
@@ -151,15 +152,14 @@ class InterpretadorIA
                 return [
                     'sucesso' => false,
                     'resposta' => null,
-                    'erro' => 'Erro na API do Gemini (HTTP ' . $response->status() . ').',
+                    'erro' => 'Erro na API do Groq (HTTP ' . $response->status() . ').',
                 ];
             }
 
-            $texto = $response->json('candidates.0.content.parts.0.text', '');
+            $texto = $response->json('choices.0.message.content', '');
 
-            // Salva o resultado na análise
             $analise->update([
-                'prompt_enviado' => $this->promptUsuario($analise),
+                'prompt_enviado' => $promptUsuario,
                 'resposta_ia'    => $texto,
                 'modelo_ia'      => $this->modelo,
             ]);

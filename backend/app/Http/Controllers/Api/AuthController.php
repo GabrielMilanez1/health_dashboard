@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Usuario;
+use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
+    public function __construct(
+        private AuthService $authService
+    ) {}
+
     /**
-     * Registrar novo usuário e retornar JWT token.
-     *
      * POST /api/auth/register
      */
     public function register(Request $request): JsonResponse
@@ -27,23 +27,17 @@ class AuthController extends Controller
             'tipo_sanguineo'  => 'nullable|string|max:5',
         ]);
 
-        $validated['senha'] = Hash::make($validated['senha']);
-
-        $usuario = Usuario::create($validated);
-
-        $token = JWTAuth::fromUser($usuario);
+        $result = $this->authService->register($validated);
 
         return response()->json([
             'message' => 'Usuário criado com sucesso.',
-            'usuario' => $usuario,
-            'token'   => $token,
+            'usuario' => $result['usuario'],
+            'token'   => $result['token'],
             'tipo'    => 'Bearer',
         ], 201);
     }
 
     /**
-     * Login do usuário e retornar JWT token.
-     *
      * POST /api/auth/login
      */
     public function login(Request $request): JsonResponse
@@ -53,27 +47,23 @@ class AuthController extends Controller
             'senha' => 'required|string',
         ]);
 
-        $usuario = Usuario::where('email', $validated['email'])->first();
+        $result = $this->authService->login($validated['email'], $validated['senha']);
 
-        if (!$usuario || !Hash::check($validated['senha'], $usuario->senha)) {
+        if (!$result) {
             return response()->json([
                 'message' => 'Credenciais inválidas.',
             ], 401);
         }
 
-        $token = JWTAuth::fromUser($usuario);
-
         return response()->json([
             'message' => 'Login realizado com sucesso.',
-            'usuario' => $usuario,
-            'token'   => $token,
+            'usuario' => $result['usuario'],
+            'token'   => $result['token'],
             'tipo'    => 'Bearer',
         ]);
     }
 
     /**
-     * Retorna os dados do usuário autenticado.
-     *
      * GET /api/auth/me
      */
     public function me(): JsonResponse
@@ -82,13 +72,11 @@ class AuthController extends Controller
     }
 
     /**
-     * Faz logout (invalida o token).
-     *
      * POST /api/auth/logout
      */
     public function logout(): JsonResponse
     {
-        auth()->logout();
+        $this->authService->logout();
 
         return response()->json([
             'message' => 'Logout realizado com sucesso.',
@@ -96,13 +84,11 @@ class AuthController extends Controller
     }
 
     /**
-     * Renova o JWT token.
-     *
      * POST /api/auth/refresh
      */
     public function refresh(): JsonResponse
     {
-        $token = auth()->refresh();
+        $token = $this->authService->refresh();
 
         return response()->json([
             'token' => $token,

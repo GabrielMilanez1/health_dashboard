@@ -35,20 +35,21 @@ if [ ! -f "artisan" ]; then
         sed -i 's|->withMiddleware(function (Middleware $middleware): void {|->withMiddleware(function (Middleware $middleware): void {\n        $middleware->append(\\App\\Http\\Middleware\\SecurityHeaders::class);|' bootstrap/app.php 2>/dev/null || true
     fi
 
-    # Add Gemini API config to config/services.php
-    if ! grep -q "gemini" config/services.php 2>/dev/null; then
+    # Add Groq config to config/services.php
+    if ! grep -q "groq" config/services.php 2>/dev/null; then
         sed -i "/^];/i\\
     /*\\
     |--------------------------------------------------------------------------\\
-    | Google Gemini AI\\
+    | Groq (LLM)\\
     |--------------------------------------------------------------------------\\
     |\\
-    | Configuration for Google Gemini API integration.\\
-    | Get your API key at: https://aistudio.google.com/apikey\\
+    | Configuration for Groq API integration.\\
+    | Get your API key at: https://console.groq.com/keys\\
     |\\
     */\\
-    'gemini' => [\\
-        'api_key' => env('GEMINI_API_KEY'),\\
+    'groq' => [\\
+        'api_key' => env('GROQ_API_KEY'),\\
+        'modelo'  => env('GROQ_MODEL', 'llama-3.3-70b-versatile'),\\
     ],\\
 " config/services.php 2>/dev/null || true
     fi
@@ -82,12 +83,12 @@ sed -i "s|APP_ENV=.*|APP_ENV=${APP_ENV:-local}|" .env
 sed -i "s|APP_DEBUG=.*|APP_DEBUG=${APP_DEBUG:-true}|" .env
 sed -i "s|APP_URL=.*|APP_URL=http://localhost:9000|" .env
 
-# Add GEMINI_API_KEY to .env if not present
-if ! grep -q "GEMINI_API_KEY" .env; then
+# Add Groq config to .env if not present
+if ! grep -q "GROQ_API_KEY" .env; then
     echo "" >> .env
-    echo "# Google Gemini AI" >> .env
-    echo "GEMINI_API_KEY=${GEMINI_API_KEY:-}" >> .env
-    echo "GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}" >> .env
+    echo "# Groq API (LLM)" >> .env
+    echo "GROQ_API_KEY=${GROQ_API_KEY:-}" >> .env
+    echo "GROQ_MODEL=${GROQ_MODEL:-llama-3.3-70b-versatile}" >> .env
 fi
 
 # =============================================================================
