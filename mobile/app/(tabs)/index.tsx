@@ -99,12 +99,7 @@ export default function DashboardScreen() {
           <Text style={styles.statValue}>{lastDate || '—'}</Text>
           <Text style={styles.statLabel}>Última análise</Text>
         </View>
-        <View style={[styles.statCard, styles.statCardApi]}>
-          <Text style={styles.statValue}>
-            {healthData ? '🟢' : '🔴'}
-          </Text>
-          <Text style={styles.statLabel}>API</Text>
-        </View>
+
       </View>
 
       {/* CTA Button */}
@@ -244,9 +239,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border.primary,
   },
-  statCardApi: {
-    flex: 0.6,
-  },
+
   statValue: {
     fontSize: fontSize.lg,
     fontWeight: fontWeight.bold,

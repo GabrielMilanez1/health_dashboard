@@ -19,12 +19,19 @@ class AuthController extends Controller
     public function register(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'nome'            => 'required|string|max:255',
+            'nome'            => ['required', 'string', 'min:3', 'max:255', 'regex:/^[\pL\s\.\'\-]+$/u'],
             'email'           => 'required|email|max:255|unique:tb_usuarios,email',
             'senha'           => 'required|string|min:8|max:128',
-            'telefone'        => 'nullable|string|max:20',
-            'data_nascimento' => 'nullable|date',
-            'tipo_sanguineo'  => 'nullable|string|max:5',
+            'telefone'        => ['nullable', 'string', 'regex:/^\d{10,11}$/'],
+            'data_nascimento' => 'nullable|date_format:Y-m-d|before:today',
+            'tipo_sanguineo'  => ['nullable', 'string', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-'],
+        ], [
+            'nome.regex'             => 'O nome deve conter apenas letras e espaços.',
+            'nome.min'               => 'O nome deve ter no mínimo 3 caracteres.',
+            'telefone.regex'         => 'Telefone inválido. Informe 10 ou 11 dígitos.',
+            'data_nascimento.date_format' => 'Data de nascimento inválida. Use o formato AAAA-MM-DD.',
+            'data_nascimento.before' => 'Data de nascimento deve ser anterior a hoje.',
+            'tipo_sanguineo.in'      => 'Tipo sanguíneo inválido.',
         ]);
 
         $result = $this->authService->register($validated);

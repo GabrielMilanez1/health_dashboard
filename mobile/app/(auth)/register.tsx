@@ -23,6 +23,29 @@ import { colors, spacing, borderRadius, fontSize, fontWeight, shadows } from '..
 
 const TIPOS_SANGUINEOS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
+/** Aplica máscara de telefone: (XX) XXXXX-XXXX */
+function maskTelefone(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 2) return digits.length ? `(${digits}` : '';
+  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
+/** Aplica máscara de data: DD/MM/AAAA */
+function maskData(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
+
+/** Converte DD/MM/AAAA para AAAA-MM-DD (formato ISO para a API) */
+function dataParaISO(dataBR: string): string {
+  const parts = dataBR.split('/');
+  if (parts.length !== 3 || parts[2].length !== 4) return dataBR;
+  return `${parts[2]}-${parts[1]}-${parts[0]}`;
+}
+
 export default function RegisterScreen() {
   const { register } = useAuth();
   const [nome, setNome] = useState('');
@@ -50,8 +73,8 @@ export default function RegisterScreen() {
         nome: nome.trim(),
         email: email.trim(),
         senha,
-        ...(telefone.trim() ? { telefone: telefone.trim() } : {}),
-        ...(dataNascimento.trim() ? { data_nascimento: dataNascimento.trim() } : {}),
+        ...(telefone.trim() ? { telefone: telefone.replace(/\D/g, '') } : {}),
+        ...(dataNascimento.trim() ? { data_nascimento: dataParaISO(dataNascimento.trim()) } : {}),
         ...(tipoSanguineo ? { tipo_sanguineo: tipoSanguineo } : {}),
       });
     } catch (err) {
@@ -165,11 +188,12 @@ export default function RegisterScreen() {
             <TextInput
               style={styles.input}
               value={telefone}
-              onChangeText={setTelefone}
+              onChangeText={(text) => setTelefone(maskTelefone(text))}
               placeholder="(11) 99999-9999"
               placeholderTextColor={colors.text.disabled}
               keyboardType="phone-pad"
               autoComplete="tel"
+              maxLength={15}
             />
           </View>
 
@@ -179,9 +203,10 @@ export default function RegisterScreen() {
             <TextInput
               style={styles.input}
               value={dataNascimento}
-              onChangeText={setDataNascimento}
-              placeholder="AAAA-MM-DD"
+              onChangeText={(text) => setDataNascimento(maskData(text))}
+              placeholder="DD/MM/AAAA"
               placeholderTextColor={colors.text.disabled}
+              keyboardType="numeric"
               maxLength={10}
             />
           </View>

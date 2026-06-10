@@ -18,6 +18,11 @@ class AnaliseBiomarcadorService
      */
     public function criar(int $usuarioId, array $dados): array
     {
+        // Sanitiza campo de texto livre — remove qualquer tag HTML/script
+        if (!empty($dados['observacoes'])) {
+            $dados['observacoes'] = strip_tags($dados['observacoes']);
+        }
+
         $analise = $this->repository->create([
             'usuario_id' => $usuarioId,
             ...$dados,
