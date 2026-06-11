@@ -14,11 +14,12 @@ Para rodar o app (a primeira vez demora alguns minutos pra fazer o build):
 ```bash
 ELECTRON_DISABLE_SANDBOX=1 npx expo run:android
 ```
-
 Para rodar os testes:
 ```
 docker exec -it health-dashboard-backend php artisan test
 ```
+<a href="https://youtube.com/shorts/sugjERcCo-4">Clique aqui e veja o vídeo de uso do app:</a>
+
 
 ---
 
