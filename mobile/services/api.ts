@@ -8,6 +8,8 @@
  */
 
 import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
+import { NativeModules } from 'react-native';
 import type {
   HealthResponse,
   AuthResponse,
@@ -19,9 +21,60 @@ import type {
   Usuario,
 } from '../types';
 
-// Android emulator maps 10.0.2.2 to the host machine's localhost
-const API_BASE_URL: string =
-  process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:9000';
+// ---------------------------------------------------------------------------
+// Auto-detect the API host from the dev server connection.
+// Strategy: try multiple sources to find the IP the phone used to reach
+// the Metro bundler, then reuse that IP for the backend API (port 9000).
+// This works universally — any machine, any Expo version, any device.
+// ---------------------------------------------------------------------------
+function getDevServerHost(): string | null {
+  // Strategy 1: expo-constants (varies by SDK version)
+  const debuggerHost =
+    Constants.expoGoConfig?.debuggerHost ??
+    Constants.expoConfig?.hostUri ??
+    (Constants as any).manifest?.debuggerHost ??
+    (Constants as any).manifest2?.extra?.expoGo?.debuggerHost ??
+    null;
+
+  if (debuggerHost) {
+    return debuggerHost.split(':')[0];
+  }
+
+  // Strategy 2: React Native's SourceCode native module.
+  // The phone loads the JS bundle from something like:
+  //   http://192.168.15.2:8082/index.bundle?platform=android&...
+  // This ALWAYS contains the correct host IP.
+  try {
+    const scriptURL: string | undefined =
+      NativeModules?.SourceCode?.scriptURL ??
+      NativeModules?.SourceCode?.getConstants?.()?.scriptURL;
+
+    if (scriptURL) {
+      const match = scriptURL.match(/^https?:\/\/([^:/]+)/);
+      if (match) return match[1];
+    }
+  } catch {}
+
+  return null;
+}
+
+function getApiBaseUrl(): string {
+  // 1. Explicit env var always wins (e.g. production builds)
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
+  }
+
+  // 2. Auto-detect from dev server connection
+  const host = getDevServerHost();
+  if (host) {
+    return `http://${host}:9000`;
+  }
+
+  // 3. Fallback for Android emulator
+  return 'http://10.0.2.2:9000';
+}
+
+const API_BASE_URL: string = getApiBaseUrl();
 
 const TOKEN_KEY = 'health_dashboard_jwt';
 

@@ -100,6 +100,18 @@ if ! grep -q "GROQ_API_KEY" .env; then
     echo "GROQ_MODEL=${GROQ_MODEL:-llama-3.3-70b-versatile}" >> .env
 fi
 
+# Add JWT secret to .env if not present
+if ! grep -q "JWT_SECRET" .env; then
+    echo "" >> .env
+    echo "# JWT Authentication" >> .env
+    echo "JWT_SECRET=${JWT_SECRET:-}" >> .env
+else
+    # Update existing JWT_SECRET with Docker environment value
+    if [ -n "${JWT_SECRET}" ]; then
+        sed -i "s|JWT_SECRET=.*|JWT_SECRET=${JWT_SECRET}|" .env
+    fi
+fi
+
 # =============================================================================
 # File Permissions (Apache needs write access to storage and cache)
 # =============================================================================
