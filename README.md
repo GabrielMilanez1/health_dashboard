@@ -15,6 +15,11 @@ Para rodar o app (a primeira vez demora alguns minutos pra fazer o build):
 ELECTRON_DISABLE_SANDBOX=1 npx expo run:android
 ```
 
+Para rodar os testes:
+```
+docker exec -it health-dashboard-backend php artisan test
+```
+
 ---
 
 ## 🤖 Uso de Inteligência Artificial
@@ -25,8 +30,9 @@ Este projeto foi desenvolvido com o auxílio de ferramentas de IA.
 - O container Docker foi gerado **exclusivamente pela IA**, seguindo os requisitos e regras definidos previamente.
 
 ### Back-end (Laravel)
-- Toda a **arquitetura e estrutura de pastas** do projeto foi desenhada manualmente, incluindo a aplicação do **princípio de responsabilidade única (SRP)**, dividindo o projeto em camadas bem definidas: **Models, Repositories, Controllers e Services**.
+- Toda a **arquitetura e estrutura de pastas** do projeto foi desenhada manualmente, incluindo a aplicação do **princípio de responsabilidade única (SRP)**, dividindo o projeto em camadas bem definidas: **Models, Repositories, Controllers e Services**, além de optar por JWT e segurança contra XSS.
 - A IA foi utilizada apenas como um **escritor de código**, atuando sob orientação direta para otimizar o tempo de entrega, sem interferir nas decisões arquiteturais.
+- A documentação na raiz do projeto também foi gerada por IA, para facilitar o entendimento da API.
 
 ### Front-end (React Native / Expo)
 - Foi definido um **esboço/wireframe** de como a interface deveria ser, e a IA desenvolveu toda a **estrutura e código** do front-end com base nesse direcionamento.
