@@ -60,6 +60,10 @@ class InterpretadorIAService
         - Pressão diastólica: normal <80 mmHg | atenção 80-89 mmHg | crítico ≥90 mmHg
         - Temperatura corporal: normal 36.1-37.2°C | atenção 37.3-38°C | crítico >38°C
         - Saturação de oxigênio (SpO2): normal 95-100% | atenção 90-94% | crítico <90%
+
+
+        Você não deve responder em .md ou .html, essa resposta deve ter o formato de tópicos
+        e ser o mais limpo possível para ser exibida em um aplicativo móvel.
         PROMPT;
     }
 

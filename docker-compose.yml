@@ -77,8 +77,8 @@ services:
       - ./mobile:/app
     ports:
       - "8081:8081"
-    # API URL is auto-detected from Expo's debuggerHost at runtime.
-    # Override if needed: environment: { EXPO_PUBLIC_API_URL: "http://<ip>:9000" }
+    environment:
+      EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL:-}
     depends_on:
       - backend
     networks:
