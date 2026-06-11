@@ -66,25 +66,19 @@ services:
       - app-network
 
   # ---------------------------------------------------------------------------
-  # Expo / React Native Mobile (dev server at http://localhost:8081)
+  # Mobile Dependencies (instala node_modules e encerra)
   # ---------------------------------------------------------------------------
-  mobile:
+  mobile-deps:
     build:
       context: ./docker/mobile
-    container_name: health-dashboard-mobile
-    restart: unless-stopped
+    container_name: health-dashboard-mobile-deps
+    restart: "no"
     volumes:
       - ./mobile:/app
-    ports:
-      - "8081:8081"
     environment:
       EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL:-}
-    depends_on:
-      - backend
-    networks:
-      - app-network
-    stdin_open: true
-    tty: true
+    entrypoint: ["sh", "-c", "cd /app && echo \"EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL\" > .env && npm install && echo 'Dependências instaladas com sucesso!'"]
+
 
 volumes:
   mysqldata:
