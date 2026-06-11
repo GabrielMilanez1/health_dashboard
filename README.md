@@ -30,7 +30,7 @@ Este projeto foi desenvolvido com o auxílio de ferramentas de IA.
 - O container Docker foi gerado **exclusivamente pela IA**, seguindo os requisitos e regras definidos previamente.
 
 ### Back-end (Laravel)
-- Toda a **arquitetura e estrutura de pastas** do projeto foi desenhada manualmente, incluindo a aplicação do **princípio de responsabilidade única (SRP)**, dividindo o projeto em camadas bem definidas: **Models, Repositories, Controllers e Services**, além de optar por JWT e segurança contra XSS.
+- Toda a **arquitetura e estrutura de pastas** do projeto foi desenhada manualmente, incluindo a aplicação do **princípio de responsabilidade única (SRP)**, dividindo o projeto em camadas bem definidas: **Models, Repositories, Controllers e Services**, além de optar por **JWT** e segurança contra **XSS**.
 - A IA foi utilizada apenas como um **escritor de código**, atuando sob orientação direta para otimizar o tempo de entrega, sem interferir nas decisões arquiteturais.
 - A documentação na raiz do projeto também foi gerada por IA, para facilitar o entendimento da API.
 
