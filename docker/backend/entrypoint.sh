@@ -73,6 +73,15 @@ if [ ! -f ".env" ]; then
 fi
 
 # Update .env with Docker environment variables
+# First, uncomment any commented-out DB lines so the sed replacements below can match
+sed -i "s|^# *DB_CONNECTION=|DB_CONNECTION=|" .env
+sed -i "s|^# *DB_HOST=|DB_HOST=|" .env
+sed -i "s|^# *DB_PORT=|DB_PORT=|" .env
+sed -i "s|^# *DB_DATABASE=|DB_DATABASE=|" .env
+sed -i "s|^# *DB_USERNAME=|DB_USERNAME=|" .env
+sed -i "s|^# *DB_PASSWORD=|DB_PASSWORD=|" .env
+
+# Now replace with Docker environment values
 sed -i "s|DB_CONNECTION=.*|DB_CONNECTION=${DB_CONNECTION:-mysql}|" .env
 sed -i "s|DB_HOST=.*|DB_HOST=${DB_HOST:-db}|" .env
 sed -i "s|DB_PORT=.*|DB_PORT=${DB_PORT:-3306}|" .env
