@@ -60,11 +60,9 @@ if [ ! -f "package.json" ]; then
     echo "Expo project scaffolded successfully!"
     echo ""
 else
-    # Ensure dependencies are installed
-    if [ ! -d "node_modules" ]; then
-        echo "Installing dependencies..."
-        npm install
-    fi
+    # Always run npm install to pick up any package.json changes
+    echo "Installing/updating dependencies..."
+    npm install
 fi
 
 # =============================================================================
@@ -80,4 +78,4 @@ echo "    cd mobile && npx expo start"
 echo "================================================"
 echo ""
 
-exec npx expo start --port 8081 --host 0.0.0.0
+exec npx expo start --port 8081 --host lan

@@ -1,6 +1,7 @@
 # Dependencies
 backend/vendor/
 mobile/node_modules/
+mobile/package-lock.json
 
 # Environment (contains secrets)
 .env
