@@ -13,6 +13,11 @@ use App\Http\Controllers\Api\AnaliseBiomarcadorController;
 
 // Public
 Route::get('/health', HealthController::class);
+Route::get('/', function () {
+    return response()->json([
+        'message' => 'API funcionando!',
+    ]);
+});
 
 // Auth (público)
 Route::prefix('auth')->group(function () {

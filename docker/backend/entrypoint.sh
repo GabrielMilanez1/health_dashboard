@@ -112,6 +112,12 @@ else
     fi
 fi
 
+# Generate APP_KEY if not set
+if grep -q "^APP_KEY=$" .env 2>/dev/null; then
+    echo "Generating application key..."
+    php artisan key:generate --force
+fi
+
 # =============================================================================
 # File Permissions (Apache needs write access to storage and cache)
 # =============================================================================
